@@ -1,0 +1,13 @@
+[
+  {
+    "name": "NVIDIA",
+    "domain": "nvidia.com",
+    "logo": "https://cdn.jsdelivr.net/gh/Nairwins/company-cdn/nvidia.svg"
+  },
+  
+  {
+    "name": "Google",
+    "domain": "google.com",
+    "logo": "https://cdn.jsdelivr.net/gh/Nairwins/company-cdn/google.svg"
+  }
+]
