@@ -1,5 +1,6 @@
 import requests
-import time
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 LOGO_DEV_KEY = "pk_Lkgv2GbETbS0ULQwNvKv5Q"
 
@@ -7,87 +8,110 @@ headers = {
     "User-Agent": "Mozilla/5.0"
 }
 
+os.makedirs("icons", exist_ok=True)
+
+
+# ----------------------------
 # Get domain from company name
-def get_domain(name):
-    url = f"https://autocomplete.clearbit.com/v1/companies/suggest?query={name}"
-    
+# ----------------------------
+def get_domain(company):
     try:
-        res = requests.get(url, headers=headers)
-        if res.status_code != 200:
+        url = f"https://autocomplete.clearbit.com/v1/companies/suggest?query={company}"
+        r = requests.get(url, headers=headers, timeout=10)
+
+        if r.status_code != 200:
             return None
-        
-        data = res.json()
+
+        data = r.json()
         if not data:
             return None
-        
-        return data[0].get("domain"), data[0].get("name")
-    
+
+        return data[0]["domain"], data[0]["name"]
+
     except:
         return None
 
 
-# Download PNG logo
-def download_logo(domain, name):
-    url = f"https://img.logo.dev/{domain}?token={LOGO_DEV_KEY}&format=png"
-    
+# ----------------------------
+# Download logo PNG
+# ----------------------------
+def download_logo(domain):
     try:
-        res = requests.get(url, headers=headers)
-        if res.status_code != 200:
+        url = f"https://img.logo.dev/{domain}?token={LOGO_DEV_KEY}&format=png"
+        r = requests.get(url, headers=headers, timeout=15)
+
+        if r.status_code != 200:
             return False
-        
-        filename = name.replace(" ", "_") + ".png"
-        
+
+        # CLEAN DOMAIN → filename (remove .com / .net / etc)
+        clean_domain = domain.replace("www.", "")
+        clean_domain = clean_domain.split(".")[0]
+
+        filename = f"icons/{clean_domain}.png"
+
+        # SKIP IF EXISTS (NO OVERWRITE)
+        if os.path.exists(filename):
+            print(f"⏩ Skipped (exists): {clean_domain}")
+            return True
+
         with open(filename, "wb") as f:
-            f.write(res.content)
-        
+            f.write(r.content)
+
+        print(f"✅ Saved: {clean_domain}")
         return True
-    
+
     except:
         return False
 
 
-# Main process
-def process_file(file_path):
+# ----------------------------
+# Worker
+# ----------------------------
+def process_company(company):
+    result = get_domain(company)
+
+    if not result:
+        print(f"❌ No domain: {company}")
+        return company
+
+    domain, real_name = result
+
+    success = download_logo(domain)
+
+    if success:
+        return None
+    else:
+        print(f"❌ Failed: {company}")
+        return company
+
+
+# ----------------------------
+# Main
+# ----------------------------
+def main(file_path, threads=10):
+    with open(file_path, "r", encoding="utf-8") as f:
+        companies = [c.strip() for c in f if c.strip()]
+
     failed = []
 
-    with open(file_path, "r") as f:
-        companies = [line.strip() for line in f if line.strip()]
+    with ThreadPoolExecutor(max_workers=threads) as executor:
+        futures = [executor.submit(process_company, c) for c in companies]
 
-    total = len(companies)
+        for f in as_completed(futures):
+            res = f.result()
+            if res:
+                failed.append(res)
 
-    for i, company in enumerate(companies, 1):
-        print(f"\n[{i}/{total}] 🔍 {company}")
-
-        result = get_domain(company)
-
-        if not result:
-            print("❌ Domain not found")
-            failed.append(company)
-            continue
-
-        domain, real_name = result
-        print(f"✅ Found: {real_name} ({domain})")
-
-        success = download_logo(domain, real_name)
-
-        if success:
-            print("✅ Logo saved")
-        else:
-            print("❌ Logo failed")
-            failed.append(company)
-
-        time.sleep(0.3)  # avoid rate limit
-
-    # Save failed कंपनies
+    # Save failures
     if failed:
-        with open("failed.txt", "w") as f:
+        with open("failed.txt", "w", encoding="utf-8") as f:
             for c in failed:
                 f.write(c + "\n")
 
-        print("\n⚠️ Failed companies saved to failed.txt")
+        print(f"\n⚠️ Failed: {len(failed)} saved to failed.txt")
     else:
-        print("\n🎉 All الشركات downloaded successfully!")
+        print("\n🎉 All logos downloaded successfully!")
 
 
-# Run
-process_file("companies.txt")
+# RUN
+main("companies.txt", threads=12)
