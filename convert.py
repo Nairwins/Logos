@@ -4,7 +4,7 @@ from PIL import Image
 # ----------------------------
 # CONFIG
 # ----------------------------
-FOLDER = "icons"
+FOLDER = "re"
 REFERENCE_IMAGE = "reference.png"  # set your reference image here
 
 # ----------------------------
