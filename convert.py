@@ -22,23 +22,30 @@ def process_image(path, target_size):
     try:
         with Image.open(path) as img:
 
-            # Convert to RGBA (best for PNG quality + transparency)
             img = img.convert("RGBA")
 
-            # Resize with high-quality filter
-            img = img.resize(target_size, Image.LANCZOS)
+            target_w, target_h = target_size
 
-            # New file path (force .png)
+            # 1. Resize while keeping aspect ratio
+            img.thumbnail((target_w, target_h), Image.LANCZOS)
+
+            # 2. Create transparent canvas (same as reference)
+            new_img = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
+
+            # 3. Center the image
+            x = (target_w - img.width) // 2
+            y = (target_h - img.height) // 2
+
+            new_img.paste(img, (x, y), img)
+
+            # Save as PNG
             new_path = os.path.splitext(path)[0] + ".png"
+            new_img.save(new_path, "PNG", optimize=True)
 
-            # Save as PNG (lossless)
-            img.save(new_path, "PNG", optimize=True)
-
-        # Remove old file if different
         if path != new_path and os.path.exists(path):
             os.remove(path)
 
-        print(f"✅ Converted: {os.path.basename(path)} → {os.path.basename(new_path)}")
+        print(f"✅ Fixed: {os.path.basename(path)}")
 
     except Exception as e:
         print(f"❌ Failed: {path} ({e})")
