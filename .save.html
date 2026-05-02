@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firestar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #f9fafb; min-height: 100vh; display: flex; flex-direction: column; }
+    .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+    header { background: #c73552; height: 56px; display: flex; align-items: center; padding: 0 24px; gap: 10px; flex-shrink: 0; box-shadow: 0 1px 0 rgba(0,0,0,.12); }
+    .logo-box { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; }
+    .logo-text { color: white; font-size: 19px; font-weight: 700; font-family: 'DM Serif Display', serif; }
+
+    .layout { display: flex; flex: 1; }
+    nav { width: 220px; background: white; border-right: 1px solid #e5e7eb; padding: 16px 12px; flex-shrink: 0; }
+    .nav-btn { width: 100%; display: flex; align-items: center; gap: 9px; padding: 10px 14px; border: none; cursor: pointer; border-radius: 8px; margin-bottom: 2px; background: transparent; color: #6b7280; font-weight: 500; font-size: 14px; font-family: 'DM Sans', sans-serif; text-align: left; transition: all .15s; }
+    .nav-btn:hover { background: #f9fafb; color: #374151; }
+    .nav-btn.active { background: #fff1f2; color: #c73552; font-weight: 600; }
+
+    main { flex: 1; padding: 36px 48px; min-width: 0; overflow: auto; position: relative; }
+    .coming-soon { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 10px; }
+
+    .page-header { margin-bottom: 32px; }
+    .page-header-title { font-size: 28px; font-weight: 700; font-family: 'DM Serif Display', serif; color: #111827; margin-bottom: 6px; }
+    .page-header-desc { font-size: 13.5px; color: #9ca3af; line-height: 1.6; }
+    .page-header-divider { margin-top: 22px; height: 2px; background: #e5e7eb; border-radius: 999px; }
+
+    .sc-section { margin-bottom: 42px; }
+    .sc-section-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; cursor:pointer; user-select:none; padding: 6px 10px; border-radius: 8px; }
+    .sc-section-header:hover .sc-dot { background: #c73552; }
+    .sc-section-header:hover .sc-section-label { color: #c73552; }
+    .sc-section-header:hover .sc-divider { background: #f4c0ca; }
+    .sc-section-header:hover .sc-chev { color: #c73552; }
+    .sc-dot { width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; flex-shrink: 0; transition: background .15s; }
+    .sc-section-label { font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:#9ca3af; display:flex; align-items:center; gap:8px; white-space:nowrap; transition: color .15s; }
+    .sc-divider { flex:1; height:2px; background:#e5e7eb; border-radius:999px; transition: background .15s; }
+    .sc-chev { color:#c8d0dc; transition: transform .4s cubic-bezier(.4,0,.2,1), color .15s; flex-shrink:0; }
+    .sc-chev.open { transform: rotate(90deg); }
+
+    .sc-body { display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(-6px); transition: grid-template-rows .38s cubic-bezier(.4,0,.2,1), opacity .32s cubic-bezier(.4,0,.2,1), transform .32s cubic-bezier(.4,0,.2,1); overflow: hidden; }
+    .sc-body.open { grid-template-rows: 1fr; opacity: 1; transform: translateY(0); }
+    .sc-body-inner { min-height: 0; overflow: hidden; }
+
+    .sc-search-wrap { position:relative; margin-bottom:18px; }
+    .sc-search { width:100%; padding:9px 38px 9px 16px; border:1.5px solid #e5e7eb; border-radius:999px; font-size:13px; font-family:'DM Sans',sans-serif; color:#374151; background:white; transition:border-color .15s; outline:none !important; box-shadow:none !important; -webkit-appearance:none; appearance:none; }
+    .sc-search:hover { border-color:#c2c8cf; }
+    .sc-search:focus { border-color:#c73552; }
+
+    .logo-grid { display:flex; flex-wrap:wrap; gap:50px; padding-left:10px; position:relative; }
+
+    .pagination { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:28px; }
+    .page-arrow { width:32px; height:32px; border-radius:50%; border:none; background:transparent; color:#c8d0dc; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: color .15s; flex-shrink:0; }
+    .page-arrow:hover:not(:disabled) { color:#c73552; }
+    .page-arrow:disabled { opacity:.3; cursor:not-allowed; }
+    .page-dots-wrap { display:flex; align-items:center; gap:6px; }
+    .page-dot { width:8px; height:8px; border-radius:50%; background:#e5e7eb; border:none; cursor:pointer; transition: all .2s ease; padding:0; flex-shrink:0; }
+    .page-dot.active { background:#c73552; width:22px; border-radius:999px; }
+    .page-dot:hover:not(.active) { background:#c8d0dc; }
+
+    /* ── Logo card ── */
+    .logo-card { display:flex; flex-direction:column; align-items:center; cursor:pointer; background:transparent; border:none; position:relative; width:90px; padding-top:10px; text-decoration:none; user-select:none; transition: transform .2s cubic-bezier(.4,0,.2,1), opacity .2s; }
+    .logo-card:hover .lc-name { color:#c73552; }
+    .logo-card.drag-src { opacity:0.3; transform:scale(0.92); }
+
+    .lc-inner { position:relative; width:90px; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+    .logo-card:hover .lc-inner { transform: translateY(-10px); }
+    .logo-card.editing .lc-inner { transform: translateY(-10px); }
+    .logo-card.editing .lc-name { color:#c73552; }
+
+    .lc-inner::after { content:''; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); width:60px; height:12px; border-radius:50%; background:radial-gradient(ellipse at center, rgba(0,0,0,.22) 0%, rgba(0,0,0,0) 75%); opacity:0; transition:opacity .25s, width .25s, bottom .25s; pointer-events:none; }
+    .logo-card:hover .lc-inner::after { opacity:1; width:70px; bottom:-16px; }
+    .logo-card.editing .lc-inner::after { opacity:1; width:70px; bottom:-16px; }
+
+    /* ── Disable native image drag ── */
+    .lc-img, .logo-card img, #drag-ghost img {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: none;
+      draggable: false;
+    }
+
+    .lc-img { width:90px; height:90px; border-radius:22px; display:block; object-fit:cover; border:none; background:transparent; }
+    .lc-fallback { width:90px; height:90px; border-radius:22px; display:flex; align-items:center; justify-content:center; background:#f3f4f6; font-size:28px; font-weight:800; color:#c73552; font-family:'DM Serif Display',serif; }
+
+    .lc-star { position:absolute; top:-10.5px; right:-10.5px; width:25px; height:25px; border:none; background:none; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:opacity .2s ease; opacity:0; z-index:5; }
+    .lc-star svg { transition: fill .15s, stroke .15s, transform .3s cubic-bezier(.34,1.56,.64,1); }
+    .lc-star:hover svg { fill:#c73552 !important; stroke:#c73552 !important; }
+    .lc-star:hover { transform:scale(1.2); }
+    .lc-star.fav-active { opacity:1; }
+    .lc-star.fav-active svg { fill:#fbbf24 !important; stroke:#fbbf24 !important; }
+    .lc-star.star-pop svg { transform: scale(1.5) rotate(20deg); }
+    .logo-card:hover .lc-star { opacity:1; }
+    .logo-card.editing .lc-star { opacity:1; }
+
+    .lc-dots { position:absolute; top:10px; right:-8px; width:22px; height:22px; border:none; background:none; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; z-index:5; transition: opacity .2s ease, transform .12s; pointer-events:none; }
+    .lc-dots svg { transition: fill .15s; }
+    .lc-dots:hover svg { fill:#c73552 !important; }
+    .lc-dots:hover { transform:scale(1.2); }
+    .logo-card:hover .lc-dots, .logo-card.editing .lc-dots { opacity:1; pointer-events:auto; }
+
+    .lc-name { font-size:13.5px; font-weight:600; color:#374151; text-align:center; transition:color .15s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px; margin-top:10px; width:100%; }
+    .lc-time { font-size:10px; color:#c8d0dc; font-weight:500; display:flex; align-items:center; justify-content:center; gap:3px; white-space:nowrap; min-height:14px; width:100%; margin-top:2px; }
+
+    .fav-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 0 12px; gap:10px; }
+    .fav-empty-icon { color:#e5e7eb; }
+    .fav-empty-title { font-size:15px; font-weight:600; color:#9ca3af; }
+    .fav-empty-sub { font-size:13px; color:#d1d5db; text-align:center; max-width:260px; line-height:1.6; }
+
+    .add-card { display:flex; flex-direction:column; align-items:center; width:90px; cursor:pointer; padding-top:10px; }
+    .add-card-inner { width:90px; height:90px; border-radius:22px; border:2px dashed #d1d5db; background:#f3f4f6; display:flex; align-items:center; justify-content:center; transition: all .25s cubic-bezier(.34,1.56,.64,1); color:#9ca3af; transform-origin: bottom center; }
+    .add-card:hover .add-card-inner { border-color:#c73552; background:#fff1f2; color:#c73552; transform: scaleY(1.13) scaleX(1.06); }
+    .add-card:hover .add-card-lbl { color:#c73552; }
+    .add-card-lbl { font-size:12px; font-weight:600; color:#9ca3af; margin-top:22px; transition:color .15s; }
+
+    /* ── Floating drag ghost ── */
+    #drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 90px;
+      padding-top: 10px;
+      transform: translate(-50%, -50%) rotate(5deg) scale(1.15);
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,.28));
+    }
+    #drag-ghost .lc-name { color:#c73552; margin-top:10px; font-size:13.5px; font-weight:600; text-align:center; white-space:nowrap; }
+
+    /* ── Drop slot ── */
+    .drop-slot {
+      width: 90px;
+      height: 110px;
+      border-radius: 22px;
+      background: rgba(199,53,82,.07);
+      border: 2px dashed rgba(199,53,82,.3);
+      flex-shrink: 0;
+      margin-top: 10px;
+      transition: all .15s cubic-bezier(.4,0,.2,1);
+    }
+
+    .dot-menu { position:absolute; background:white; border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,.14); padding:5px; z-index:9999; min-width:150px; animation:menuIn .12s ease; }
+    @keyframes menuIn { from{opacity:0;transform:translateY(4px) scale(.97)} to{opacity:1;transform:none} }
+    .dot-opt { width:100%; text-align:left; padding:8px 12px; border:none; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background .12s,color .12s; display:flex; align-items:center; gap:8px; background:transparent; color:#374151; font-weight:500; }
+    .dot-opt:hover { background:#f9fafb; color:#111827; }
+    .dot-opt.edit-opt:hover { background:#fff1f2; color:#c73552; }
+    .dot-opt.danger:hover { background:#fef2f2; color:#dc2626; }
+
+    .modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.4); display:flex; align-items:center; justify-content:center; z-index:200; backdrop-filter:blur(8px); animation:fadeIn .15s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(18px) scale(.97)} to{opacity:1;transform:none} }
+    .modal { background:white; border-radius:22px; width:480px; max-width:95vw; box-shadow:0 32px 80px -12px rgba(0,0,0,.25); overflow:hidden; animation:slideUp .2s ease; }
+    .inp { width:100%; padding:9px 13px; border:1.5px solid #e5e7eb; border-radius:9px; font-size:14px; font-family:'DM Sans',sans-serif; color:#111827; outline:none !important; box-shadow:none !important; transition:border-color .15s; background:#f9fafb; }
+    .inp:focus { border-color:#c73552; background:white; }
+    label.lbl { display:block; font-size:11px; font-weight:700; color:#6b7280; margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+    .modal-btn-cancel { flex:1; padding:11px; border:1.5px solid #e5e7eb; border-radius:10px; background:white; color:#6b7280; cursor:pointer; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:500; transition:all .15s; }
+    .modal-btn-cancel:hover { background:#f9fafb; border-color:#d1d5db; }
+    .modal-btn-save { flex:3; padding:11px; border:none; border-radius:10px; background:#c73552; color:white; cursor:pointer; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:700; transition:background .15s; }
+    .modal-btn-save:hover { background:#b83049; }
+    .modal-btn-danger { flex:1; padding:11px; border:none; border-radius:10px; background:#c73552; color:white; cursor:pointer; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:700; transition:background .15s; }
+    .modal-btn-danger:hover { background:#b12d47; }
+    .sc-empty { padding:20px 0 8px; color:#d1d5db; font-size:13px; display:flex; align-items:center; gap:8px; }
+
+    .logo-upload-area { width:64px; height:64px; border-radius:14px; border:1.5px solid #e5e7eb; background:#f8fafc; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; flex-shrink:0; position:relative; transition: border-color .15s; }
+    .logo-upload-area:hover { border-color:#c73552; }
+    .logo-upload-area img { width:64px; height:64px; object-fit:cover; border-radius:13px; }
+    .logo-remove-btn { position:absolute; top:-5px; right:-5px; width:18px; height:18px; border-radius:50%; background:#c73552; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:700; line-height:1; z-index:10; transition: background .15s; }
+    .logo-remove-btn:hover { background:#a02a44; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C9 6 7 10 9 13.5a4 4 0 007 0C18 10 15 6 12 2z" fill="white" opacity=".95"/>
+        <path d="M12 9c-1 2-1.5 3.5-.5 5a1.8 1.8 0 003 0c1-1.5.5-3-.5-5-.3 1-.7 1.8-1 2-.3-.2-.7-1-1-2z" fill="#fbbf24"/>
+      </svg>
+    </div>
+    <span class="logo-text">Firestar</span>
+  </header>
+  <div class="layout">
+    <nav>
+      <button class="nav-btn" data-tab="Applications" onclick="switchTab('Applications')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+        Applications
+      </button>
+      <button class="nav-btn" data-tab="Resume" onclick="switchTab('Resume')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Resume
+      </button>
+      <button class="nav-btn active" data-tab="Shortcuts" onclick="switchTab('Shortcuts')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Shortcuts
+      </button>
+      <button class="nav-btn" data-tab="Billing" onclick="switchTab('Billing')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Billing
+      </button>
+    </nav>
+    <main id="main-content"></main>
+  </div>
+</div>
+<div id="modal-root"></div>
+
+<script>
+const TAB_ICONS = {
+  Applications:`<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>`,
+  Resume:`<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/>`,
+  Shortcuts:`<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>`,
+  Billing:`<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>`
+};
+
+const POPULAR_BASE = [
+  {id:'linkedin',   name:'LinkedIn',    domain:'linkedin',      url:'https://www.linkedin.com/jobs'},
+  {id:'google',     name:'Google',      domain:'google',        url:'https://www.google.com/about/careers/applications/jobs/results'},
+  {id:'apple',      name:'Apple',       domain:'apple',         url:'https://jobs.apple.com/en-us/search'},
+  {id:'meta',       name:'Meta',        domain:'meta',          url:'https://www.metacareers.com/jobsearch/'},
+  {id:'microsoft',  name:'Microsoft',   domain:'microsoft',     url:'https://apply.careers.microsoft.com/careers'},
+  {id:'nvidia',     name:'Nvidia',      domain:'nvidia',        url:'https://jobs.nvidia.com/careers'},
+  {id:'amd',        name:'AMD',         domain:'amd',           url:'hhttps://careers.amd.com/careers-home/jobs'},
+  {id:'arm',        name:'ARM',         domain:'arm',           url:'https://careers.arm.com/search-jobs'},
+  {id:'tesla',      name:'Tesla',       domain:'tesla',         url:'https://www.tesla.com/careers/search'},
+  {id:'netflix',    name:'Netflix',     domain:'netflix',       url:'https://explore.jobs.netflix.net/careers'},
+  {id:'ibm',        name:'IBM',         domain:'ibm',           url:'https://www.ibm.com/careers/search'},
+  {id:'oracle',     name:'Oracle',      domain:'oracle',        url:'https://careers.oracle.com/en/sites/jobsearch/jobs'},
+  {id:'amazon',     name:'Amazon',      domain:'amazon',        url:'https://www.amazon.jobs/en/search'},
+  {id:'indeed',     name:'Indeed',      domain:'indeed',        url:'https://indeed.com'},
+  {id:'glassdoor',  name:'Glassdoor',   domain:'glassdoor',     url:'https://www.glassdoor.com/Job/index.htm'},
+  {id:'intel',      name:'Intel',       domain:'intel',         url:'https://intel.wd1.myworkdayjobs.com/External'},
+  {id:'acer',       name:'Acer',        domain:'acer',          url:'https://careers.acer.com/search'},
+  {id:'x',          name:'X',           domain:'x',             url:'https://x.ai/careers/open-roles'},
+  {id:'shopify',    name:'Shopify',     domain:'shopify',       url:'https://www.shopify.com/careers'},
+  {id:'stripe',     name:'Stripe',      domain:'stripe',        url:'https://stripe.com/jobs/search'},
+  {id:'airbnb',     name:'Airbnb',      domain:'airbnb',        url:'https://careers.airbnb.com/positions'},
+  {id:'uber',       name:'Uber',        domain:'uber',          url:'https://www.uber.com/ma/en/careers/list'},
+  {id:'spotify',    name:'Spotify',     domain:'spotify',       url:'https://www.lifeatspotify.com/jobs'},
+  {id:'adobe',      name:'Adobe',       domain:'adobe',         url:'https://careers.adobe.com/us/en/search-results'},
+  {id:'autodesk',   name:'Autodesk',    domain:'autodesk',      url:'https://autodesk.wd1.myworkdayjobs.com/Ext'},
+  {id:'openai',     name:'OpenAI',      domain:'openai',        url:'https://openai.com/careers/search'},
+  {id:'bertrandt',  name:'Bertrandt',   domain:'bertrandt',     url:'https://bertrandt.jobs.hr.cloud.sap/search'},
+  {id:'capcom',     name:'Capcom',      domain:'capcom',        url:'https://hrmos.co/pages/capcom'},
+  {id:'activision', name:'Activision',  domain:'activision',    url:'https://careers.activisionblizzard.com/search-results'},
+  {id:'dxc',        name:'DXC',         domain:'dxc',           url:'https://careers.dxc.com/job-search-results'},
+  {id:'orange',     name:'Orange',      domain:'orange',        url:'https://orange.jobs/gb/en/search-results'},
+  {id:'capgemini',  name:'Capgemini',   domain:'capgemini',     url:'https://www.capgemini.com/careers/join-capgemini/job-search'},
+  {id:'nokia',      name:'Nokia',       domain:'nokia',         url:'https://jobs.nokia.com/en/sites/CX_1/jobs'},
+  
+];
+
+function logoUrl(d){ return `https://raw.githubusercontent.com/Nairwins/Logos/main/logos/${d}.png`; }
+
+let state = {
+  tab:'Shortcuts',
+  sections:{favorites:false, popular:true, custom:false},
+  searches:{favorites:'', popular:'', custom:''},
+  pages:{favorites:1, popular:1, custom:1},
+  visits:{}, favorites:[], custom:[],
+  editingCustomId:null, selectedIconUrl:null, uploadedImageData:null,
+  activeEditingCardId:null,
+  popularOrder:null,
+};
+
+function getPopular(){
+  if(!state.popularOrder) return [...POPULAR_BASE];
+  return state.popularOrder.map(id=>POPULAR_BASE.find(p=>p.id===id)).filter(Boolean);
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getMain(){ return document.getElementById('main-content'); }
+function saveScroll(){ return getMain().scrollTop; }
+function restoreScroll(pos){
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ getMain().scrollTop=pos; }); });
+}
+
+function getDotRoot(){
+  let root=document.getElementById('dotmenu-root');
+  if(!root){
+    root=document.createElement('div');
+    root.id='dotmenu-root';
+    root.style.cssText='position:absolute;top:0;left:0;width:0;height:0;z-index:9999;pointer-events:none;';
+    getMain().appendChild(root);
+  }
+  return root;
+}
+
+function getPerRow(key){
+  const inner=document.getElementById(`sc-inner-${key}`);
+  if(!inner||inner.offsetWidth===0) return 7;
+  return Math.max(1,Math.floor((inner.offsetWidth-10+50)/(90+50)));
+}
+function getPageSize(key,totalItems){
+  const perRow=getPerRow(key), min=perRow*3;
+  return totalItems<=min?(totalItems||min):min;
+}
+
+function timeAgo(ts){
+  if(!ts) return null;
+  const diff=Date.now()-ts, h=Math.floor(diff/3600000), d=Math.floor(diff/86400000);
+  const w=Math.floor(d/7), mo=Math.floor(d/30), y=Math.floor(d/365);
+  if(h<1) return 'just now'; if(h<24) return `${h}h ago`;
+  if(d<7) return `${d}d ago`; if(w<5) return `${w}w ago`;
+  if(mo<12) return `${mo}mo ago`; return `${y}y ago`;
+}
+function clockSvg(){ return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`; }
+function starSvg(f){ const c=f?'#fbbf24':'#9ca3af'; return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${c}" stroke="${c}" stroke-width="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`; }
+function dotsSvg(a){ const c=a?'#c73552':'#9ca3af'; return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${c}"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>`; }
+
+function visitLink(id,url){
+  if(dnd.active) return;
+  state.visits[id]=Date.now();
+  document.querySelectorAll(`.lc-time[data-time-id="${id}"]`).forEach(el=>{
+    const t=timeAgo(state.visits[id]); el.innerHTML=t?clockSvg()+t:'';
+  });
+  window.open(url,'_blank');
+}
+
+function toggleFavorite(id){
+  const wasFav=state.favorites.includes(id);
+  state.favorites=wasFav?state.favorites.filter(f=>f!==id):[...state.favorites,id];
+  const isFav=!wasFav;
+  document.querySelectorAll(`.lc-star[data-fav-id="${id}"]`).forEach(btn=>{
+    btn.classList.toggle('fav-active',isFav); btn.innerHTML=starSvg(isFav);
+    btn.classList.remove('star-pop'); void btn.offsetWidth; btn.classList.add('star-pop');
+    setTimeout(()=>btn.classList.remove('star-pop'),300);
+  });
+  if(state.sections.favorites) renderSectionInner('favorites');
+}
+
+function toggleSection(key){
+  state.sections[key]=!state.sections[key];
+  const body=document.getElementById(`sc-body-${key}`), chev=document.getElementById(`sc-chev-${key}`);
+  if(body) body.classList.toggle('open',state.sections[key]);
+  if(chev) chev.classList.toggle('open',state.sections[key]);
+  if(state.sections[key]) setTimeout(()=>renderSectionInner(key),60);
+}
+
+function setSearch(key,val){ state.searches[key]=val; state.pages[key]=1; renderSectionInner(key); }
+function setPage(key,p){ const s=saveScroll(); state.pages[key]=p; renderSectionInner(key); restoreScroll(s); }
+
+function renderPagination(key,total,pageSize){
+  const tp=Math.ceil(total/pageSize); if(tp<=1) return '';
+  const cur=state.pages[key]||1;
+  const prev=`<button class="page-arrow" ${cur===1?'disabled':''} onclick="setPage('${key}',${cur-1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>`;
+  const next=`<button class="page-arrow" ${cur===tp?'disabled':''} onclick="setPage('${key}',${cur+1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+  let dots=''; for(let i=1;i<=tp;i++) dots+=`<button class="page-dot ${i===cur?'active':''}" onclick="setPage('${key}',${i})"></button>`;
+  return `<div class="pagination">${prev}<div class="page-dots-wrap">${dots}</div>${next}</div>`;
+}
+
+/* ══════════════════════════════════════════════
+   DRAG & DROP
+   Hold 480ms → ghost → move → left-click drop
+   Right-click or Escape → cancel & revert
+   Cards cannot leave their own section
+   ══════════════════════════════════════════════ */
+const dnd = {
+  active:false, sectionKey:null, dragId:null,
+  overIndex:-1, holdTimer:null, ghost:null,
+  mouseX:0, mouseY:0, originalOrder:null,
+};
+const HOLD_MS = 480;
+
+function onCardMouseDown(e,id,sectionKey){
+  if(e.button!==0) return;
+  e.preventDefault();
+  dnd.dragId=id; dnd.sectionKey=sectionKey;
+  dnd.mouseX=e.clientX; dnd.mouseY=e.clientY;
+  dnd.holdTimer=setTimeout(()=>activateDrag(id,sectionKey,e.clientX,e.clientY), HOLD_MS);
+}
+
+function cancelHold(){
+  if(dnd.holdTimer){ clearTimeout(dnd.holdTimer); dnd.holdTimer=null; }
+}
+
+function activateDrag(id,sectionKey,x,y){
+  dnd.active=true; dnd.holdTimer=null;
+
+  // snapshot for cancel
+  if(sectionKey==='popular') dnd.originalOrder=getPopular().map(i=>i.id);
+  else if(sectionKey==='custom') dnd.originalOrder=state.custom.map(i=>i.id);
+  else dnd.originalOrder=[...state.favorites];
+
+  const allItems=sectionKey==='popular'?getPopular():sectionKey==='custom'?state.custom:[...getPopular(),...state.custom].filter(i=>state.favorites.includes(i.id));
+  const item=allItems.find(i=>i.id===id);
+  const isCustom=!!state.custom.find(c=>c.id===id);
+  const imgSrc=isCustom?item.logo:logoUrl(item.domain);
+  const initials=item.name[0].toUpperCase();
+
+  const g=document.createElement('div');
+  g.id='drag-ghost';
+  g.innerHTML=`
+    <div style="position:relative;width:90px">
+      <img style="width:90px;height:90px;border-radius:22px;display:block;object-fit:cover"
+        src="${escHtml(imgSrc)}" draggable="false"
+        onerror="this.outerHTML='<div style=width:90px;height:90px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;font-size:28px;font-weight:800;color:#c73552>${escHtml(initials)}</div>'">
+    </div>
+    <div class="lc-name">${escHtml(item.name)}</div>`;
+  g.style.left=x+'px'; g.style.top=y+'px';
+  document.body.appendChild(g);
+  dnd.ghost=g;
+
+  document.querySelectorAll(`.logo-card[data-drag-id="${id}"]`).forEach(c=>c.classList.add('drag-src'));
+  document.body.style.userSelect='none';
+  document.body.style.cursor='grabbing';
+}
+
+document.addEventListener('mousemove',e=>{
+  if(dnd.holdTimer){
+    const dx=Math.abs(e.clientX-dnd.mouseX), dy=Math.abs(e.clientY-dnd.mouseY);
+    if(dx>6||dy>6) cancelHold();
+  }
+  if(!dnd.active) return;
+  dnd.ghost.style.left=e.clientX+'px';
+  dnd.ghost.style.top=e.clientY+'px';
+  updateDropSlot(e.clientX,e.clientY);
+});
+
+document.addEventListener('mouseup',e=>{
+  cancelHold();
+  if(!dnd.active) return;
+  if(e.button===0) commitDrop();
+});
+
+document.addEventListener('contextmenu',e=>{
+  if(dnd.active){ e.preventDefault(); cancelDrag(); }
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&dnd.active) cancelDrag();
+});
+
+function updateDropSlot(mx,my){
+  const key=dnd.sectionKey;
+
+  // check cursor is inside the section bounds
+  const sectionEl=document.getElementById(`sc-inner-${key}`);
+  if(sectionEl){
+    const sr=sectionEl.getBoundingClientRect();
+    const inside=mx>=sr.left&&mx<=sr.right&&my>=sr.top&&my<=sr.bottom;
+    if(!inside){
+      if(dnd.overIndex!==-1){ dnd.overIndex=-1; renderSectionInnerWithSlot(key,-1); }
+      return;
+    }
+  }
+
+  // only cards belonging to this section
+  const grid=document.querySelector(`#sc-inner-${key} .logo-grid`);
+  if(!grid) return;
+  const cards=[...grid.querySelectorAll(`.logo-card[data-drag-section="${key}"]`)];
+  if(cards.length===0) return;
+
+  let bestIdx=-1, bestDist=Infinity;
+  cards.forEach((card,i)=>{
+    const r=card.getBoundingClientRect();
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    const dist=Math.hypot(mx-cx,my-cy);
+    if(dist<bestDist){ bestDist=dist; bestIdx=i; }
+  });
+
+  if(bestIdx===dnd.overIndex) return;
+  dnd.overIndex=bestIdx;
+  renderSectionInnerWithSlot(key,bestIdx);
+}
+
+function renderSectionInnerWithSlot(key,slotIdx){
+  const el=document.getElementById(`sc-inner-${key}`); if(!el) return;
+  const q=state.searches[key].toLowerCase().trim(), page=state.pages[key]||1;
+
+  let items;
+  if(key==='popular') items=[...getPopular()];
+  else if(key==='custom') items=[...state.custom];
+  else items=[...getPopular(),...state.custom].filter(i=>state.favorites.includes(i.id));
+  if(q) items=items.filter(i=>i.name.toLowerCase().includes(q));
+
+  const ps=getPageSize(key,key==='custom'?items.length+1:items.length);
+  const paged=items.slice((page-1)*ps,page*ps);
+  const displayItems=paged.filter(i=>i.id!==dnd.dragId);
+
+  const addCard=key==='custom'&&page===1
+    ?`<div class="add-card" onclick="openAddCustom()"><div class="add-card-inner"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="add-card-lbl">Add link</span></div>`
+    :'';
+
+  let cards=displayItems.map(i=>renderLogoCard(i,state.custom.find(c=>c.id===i.id)?'custom':'popular',key));
+
+  if(slotIdx>=0){
+    const si=Math.max(0,Math.min(slotIdx,cards.length));
+    cards.splice(si,0,`<div class="drop-slot"></div>`);
+  }
+
+  el.innerHTML=`<div class="logo-grid">${addCard}${cards.join('')}</div>${renderPagination(key,items.length,ps)}`;
+  document.querySelectorAll(`.logo-card[data-drag-id="${dnd.dragId}"]`).forEach(c=>c.classList.add('drag-src'));
+}
+
+function commitDrop(){
+  // cursor was outside section — cancel
+  if(dnd.overIndex<0){ cancelDrag(); return; }
+
+  const key=dnd.sectionKey;
+  const q=state.searches[key].toLowerCase().trim(), page=state.pages[key]||1;
+
+  let items;
+  if(key==='popular') items=[...getPopular()];
+  else if(key==='custom') items=[...state.custom];
+  else items=[...getPopular(),...state.custom].filter(i=>state.favorites.includes(i.id));
+  if(q) items=items.filter(i=>i.name.toLowerCase().includes(q));
+
+  const ps=getPageSize(key,key==='custom'?items.length+1:items.length);
+  const paged=items.slice((page-1)*ps,page*ps);
+
+  const fromItem=paged.find(i=>i.id===dnd.dragId)||items.find(i=>i.id===dnd.dragId);
+  if(!fromItem){ cleanupDrag(); renderSectionInner(key); return; }
+
+  const displayItems=paged.filter(i=>i.id!==dnd.dragId);
+  const si=Math.max(0,Math.min(dnd.overIndex,displayItems.length));
+  displayItems.splice(si,0,fromItem);
+
+  const fullIds=items.map(i=>i.id);
+  const newPagedIds=displayItems.map(i=>i.id);
+  const startIdx=(page-1)*ps;
+  const newFullIds=[...fullIds];
+  for(let i=0;i<newPagedIds.length;i++) newFullIds[startIdx+i]=newPagedIds[i];
+
+  if(key==='popular'){
+    state.popularOrder=newFullIds;
+  } else if(key==='custom'){
+    state.custom=newFullIds.map(id=>state.custom.find(c=>c.id===id)).filter(Boolean);
+  } else {
+    state.favorites=newFullIds;
+  }
+
+  cleanupDrag();
+  renderSectionInner(key);
+  if(key!=='favorites'&&state.sections.favorites) renderSectionInner('favorites');
+}
+
+function cancelDrag(){
+  if(dnd.originalOrder){
+    const key=dnd.sectionKey;
+    if(key==='popular') state.popularOrder=dnd.originalOrder;
+    else if(key==='custom') state.custom=dnd.originalOrder.map(id=>state.custom.find(c=>c.id===id)).filter(Boolean);
+    else state.favorites=dnd.originalOrder;
+  }
+  const key=dnd.sectionKey;
+  cleanupDrag();
+  if(key) renderSectionInner(key);
+}
+
+function cleanupDrag(){
+  if(dnd.ghost){ dnd.ghost.remove(); dnd.ghost=null; }
+  document.querySelectorAll('.logo-card.drag-src').forEach(c=>c.classList.remove('drag-src'));
+  document.body.style.userSelect='';
+  document.body.style.cursor='';
+  dnd.active=false; dnd.dragId=null; dnd.sectionKey=null;
+  dnd.overIndex=-1; dnd.originalOrder=null;
+}
+
+/* ── Dot menu ── */
+let activeDotMenu=null;
+
+function clearEditingState(){
+  state.activeEditingCardId=null;
+  document.querySelectorAll('.logo-card.editing').forEach(c=>c.classList.remove('editing'));
+  document.querySelectorAll('.lc-dots').forEach(b=>{ b.innerHTML=dotsSvg(false); });
+}
+
+document.addEventListener('mousedown',e=>{
+  if(activeDotMenu&&!e.target.closest('.dot-menu')&&!e.target.closest('.lc-dots')){
+    closeDotMenu(); setTimeout(clearEditingState,80);
+  }
+});
+
+function closeDotMenu(){
+  const root=getDotRoot(); root.innerHTML=''; root.style.pointerEvents='none'; activeDotMenu=null;
+}
+
+function openDotMenu(id,btnEl){
+  if(activeDotMenu===id){ closeDotMenu(); setTimeout(clearEditingState,80); return; }
+  if(state.activeEditingCardId&&state.activeEditingCardId!==id) clearEditingState();
+  activeDotMenu=id; state.activeEditingCardId=id;
+  document.querySelectorAll(`.lc-dots[data-dots-id="${id}"]`).forEach(b=>{
+    b.innerHTML=dotsSvg(true); b.closest('.logo-card')?.classList.add('editing');
+  });
+  const main=getMain(), mr=main.getBoundingClientRect(), r=btnEl.getBoundingClientRect();
+  let top=r.bottom-mr.top+main.scrollTop+6, left=r.left-mr.left;
+  const mw=155,mh=90;
+  if(left+mw>main.offsetWidth-12) left=main.offsetWidth-mw-12;
+  if(r.bottom+mh+6>window.innerHeight-12) top=r.top-mr.top+main.scrollTop-mh-6;
+  const root=getDotRoot(); root.style.pointerEvents='auto';
+  root.innerHTML=`
+    <div class="dot-menu" style="top:${top}px;left:${left}px" onclick="event.stopPropagation()">
+      <button class="dot-opt edit-opt" onclick="closeDotMenu();openEditCustom('${id}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit link
+      </button>
+      <button class="dot-opt danger" onclick="closeDotMenu();confirmDelete('${id}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        Delete
+      </button>
+    </div>`;
+}
+
+/* ── Render one card ── */
+function renderLogoCard(item,type,sectionKey){
+  const visited=state.visits[item.id], isFav=state.favorites.includes(item.id);
+  const t=visited?timeAgo(visited):null;
+  const isCustom=type==='custom', isEditing=state.activeEditingCardId===item.id;
+  const imgSrc=isCustom?escHtml(item.logo):logoUrl(item.domain);
+  const initials=escHtml(item.name[0].toUpperCase());
+  const dotsBtn=isCustom?`<button class="lc-dots" data-dots-id="${item.id}" onclick="event.stopPropagation();openDotMenu('${item.id}',this)">${dotsSvg(isEditing)}</button>`:'';
+
+  return `
+    <div class="logo-card${isEditing?' editing':''}"
+      data-drag-id="${item.id}"
+      data-drag-section="${sectionKey}"
+      onclick="visitLink('${item.id}','${escHtml(item.url)}')"
+      onmousedown="onCardMouseDown(event,'${item.id}','${sectionKey}')">
+      <div class="lc-inner">
+        <img class="lc-img" src="${imgSrc}" alt="${escHtml(item.name)}"
+          draggable="false"
+          onerror="this.outerHTML='<div class=lc-fallback>${initials}</div>'">
+        <button class="lc-star ${isFav?'fav-active':''}" data-fav-id="${item.id}"
+          onclick="event.stopPropagation();toggleFavorite('${item.id}')">${starSvg(isFav)}</button>
+        ${dotsBtn}
+      </div>
+      <span class="lc-name">${escHtml(item.name)}</span>
+      <span class="lc-time" data-time-id="${item.id}">${t?clockSvg()+t:''}</span>
+    </div>`;
+}
+
+/* ── Render section inner ── */
+function renderSectionInner(key){
+  const el=document.getElementById(`sc-inner-${key}`); if(!el) return;
+  if(el.offsetWidth===0){ requestAnimationFrame(()=>renderSectionInner(key)); return; }
+  const q=state.searches[key].toLowerCase().trim(), page=state.pages[key]||1;
+
+  if(key==='favorites'){
+    const allItems=[...getPopular(),...state.custom];
+    let items=state.favorites.map(id=>allItems.find(i=>i.id===id)).filter(Boolean);
+    if(q) items=items.filter(i=>i.name.toLowerCase().includes(q));
+    if(state.favorites.length===0){
+      el.innerHTML=`<div class="fav-empty"><svg class="fav-empty-icon" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#e5e7eb" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="fav-empty-title">No favorites yet</div><div class="fav-empty-sub">Star any company shortcut to pin your quick-access links right here.</div></div>`;
+      return;
+    }
+    if(items.length===0){ el.innerHTML=`<div class="sc-empty">No results.</div>`; return; }
+    const ps=getPageSize(key,items.length), paged=items.slice((page-1)*ps,page*ps);
+    el.innerHTML=`<div class="logo-grid">${paged.map(i=>renderLogoCard(i,state.custom.find(c=>c.id===i.id)?'custom':'popular','favorites')).join('')}</div>${renderPagination(key,items.length,ps)}`;
+    return;
+  }
+  if(key==='popular'){
+    let items=[...getPopular()];
+    if(q) items=items.filter(i=>i.name.toLowerCase().includes(q));
+    if(items.length===0){ el.innerHTML=`<div class="sc-empty">No results for "${escHtml(q)}".</div>`; return; }
+    const ps=getPageSize(key,items.length), paged=items.slice((page-1)*ps,page*ps);
+    el.innerHTML=`<div class="logo-grid">${paged.map(i=>renderLogoCard(i,'popular','popular')).join('')}</div>${renderPagination(key,items.length,ps)}`;
+    return;
+  }
+  if(key==='custom'){
+    let items=[...state.custom];
+    if(q) items=items.filter(i=>i.name.toLowerCase().includes(q));
+    const totalForPaging=items.length+1, ps=getPageSize(key,totalForPaging), paged=items.slice((page-1)*ps,page*ps);
+    const addCardHtml=page===1?`<div class="add-card" onclick="openAddCustom()"><div class="add-card-inner"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="add-card-lbl">Add link</span></div>`:'';
+    el.innerHTML=`<div class="logo-grid">${addCardHtml}${paged.map(i=>renderLogoCard(i,'custom','custom')).join('')}</div>${renderPagination(key,items.length,ps)}`;
+  }
+}
+
+/* ── Full render ── */
+function renderShortcuts(preserveScroll){
+  const scroll=preserveScroll?saveScroll():0;
+  const main=getMain();
+  const sections=[{key:'favorites',label:'Favorites'},{key:'popular',label:'Popular Platforms'},{key:'custom',label:'My Links'}];
+  main.innerHTML=`
+    <div class="page-header">
+      <div class="page-header-title">Shortcuts</div>
+      <div class="page-header-desc">Quick access to your favorite companies — switch between opportunities in a single click.</div>
+      <div class="page-header-divider"></div>
+    </div>
+    ${sections.map(s=>`
+      <div class="sc-section">
+        <div class="sc-section-header" onclick="toggleSection('${s.key}')">
+          <span class="sc-dot"></span>
+          <span class="sc-section-label">${s.label}</span>
+          <div class="sc-divider"></div>
+          <svg id="sc-chev-${s.key}" class="sc-chev ${state.sections[s.key]?'open':''}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div id="sc-body-${s.key}" class="sc-body ${state.sections[s.key]?'open':''}">
+          <div class="sc-body-inner">
+            <div class="sc-search-wrap">
+              <input class="sc-search" type="text" placeholder="Search ${s.label.toLowerCase()}…"
+                value="${escHtml(state.searches[s.key])}"
+                oninput="setSearch('${s.key}',this.value)">
+              <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#c8d0dc;pointer-events:none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div id="sc-inner-${s.key}"></div>
+          </div>
+        </div>
+      </div>`).join('')}`;
+  getDotRoot();
+  sections.forEach(s=>{ if(state.sections[s.key]) renderSectionInner(s.key); });
+  if(preserveScroll) restoreScroll(scroll);
+}
+
+/* ── Modals ── */
+function openAddCustom(){ state.editingCustomId=null; state.selectedIconUrl=null; state.uploadedImageData=null; state.activeEditingCardId=null; showCustomModal({name:'',url:'',logo:''}); }
+function openEditCustom(id){
+  const item=state.custom.find(c=>c.id===id); if(!item) return;
+  state.editingCustomId=id; state.selectedIconUrl=item.logo; state.uploadedImageData=null; state.activeEditingCardId=id;
+  document.querySelectorAll(`.lc-dots[data-dots-id="${id}"]`).forEach(b=>{ b.innerHTML=dotsSvg(true); b.closest('.logo-card')?.classList.add('editing'); });
+  showCustomModal(item);
+}
+function showCustomModal(item){
+  const hasLogo=!!(state.uploadedImageData||state.selectedIconUrl);
+  document.getElementById('modal-root').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)cancelModal()">
+      <div class="modal">
+        <div style="padding:26px 28px 18px;border-bottom:1px solid #f3f4f6">
+          <div style="font-size:19px;font-weight:700;font-family:'DM Serif Display',serif;color:#111827">${state.editingCustomId?'Edit Link':'Add Custom Link'}</div>
+          <div style="font-size:12.5px;color:#9ca3af;margin-top:3px">${state.editingCustomId?'Update your shortcut details.':'Add a direct link to any company job page.'}</div>
+        </div>
+        <div style="padding:22px 28px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="position:relative;flex-shrink:0">
+              <div class="logo-upload-area" onclick="document.getElementById('logo-file-input').click()">
+                ${hasLogo?`<img src="${escHtml(state.uploadedImageData||state.selectedIconUrl||'')}">`:
+                `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`}
+              </div>
+              ${hasLogo?`<button class="logo-remove-btn" onclick="removeLogo()">✕</button>`:''}
+              <input id="logo-file-input" type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+            </div>
+            <div style="flex:1">
+              <label class="lbl">Company Name <span style="color:#c73552">*</span></label>
+              <input id="m-cname" type="text" class="inp" placeholder="e.g. Nvidia" value="${escHtml(item.name)}">
+            </div>
+          </div>
+          <div>
+            <label class="lbl">Quick Access URL <span style="color:#c73552">*</span></label>
+            <input id="m-curl" type="text" class="inp" placeholder="https://…" value="${escHtml(item.url)}">
+          </div>
+          <div id="m-error" style="display:none;font-size:12.5px;color:#c73552;background:#fde8ec;border-radius:8px;padding:8px 12px"></div>
+        </div>
+        <div style="padding:0 28px 26px;display:flex;gap:10px">
+          <button onclick="cancelModal()" class="modal-btn-cancel">Cancel</button>
+          <button onclick="saveCustomLink()" class="modal-btn-save">${state.editingCustomId?'Save Changes':'Add Link'}</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('m-cname').focus();
+}
+function cancelModal(){ closeModal(); setTimeout(clearEditingState,80); }
+function handleLogoUpload(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    state.uploadedImageData=ev.target.result; state.selectedIconUrl=null;
+    const area=document.querySelector('.logo-upload-area');
+    if(area){
+      area.innerHTML=`<img src="${ev.target.result}">`;
+      let rb=document.querySelector('.logo-remove-btn');
+      if(!rb){ rb=document.createElement('button'); rb.className='logo-remove-btn'; rb.textContent='✕'; rb.onclick=removeLogo; area.parentNode.appendChild(rb); }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo(){
+  state.uploadedImageData=null; state.selectedIconUrl=null;
+  const area=document.querySelector('.logo-upload-area');
+  if(area) area.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+  const rb=document.querySelector('.logo-remove-btn'); if(rb) rb.remove();
+}
+function saveCustomLink(){
+  const scroll=saveScroll();
+  const name=document.getElementById('m-cname').value.trim(), url=document.getElementById('m-curl').value.trim();
+  const err=document.getElementById('m-error');
+  if(!name){ err.textContent='Please enter a company name.'; err.style.display='block'; return; }
+  if(!url){ err.textContent='Please enter a URL.'; err.style.display='block'; return; }
+  const finalLogo=state.uploadedImageData||state.selectedIconUrl||`https://logo.clearbit.com/${name.toLowerCase().replace(/\s+/g,'')}.com`;
+  if(state.editingCustomId){
+    const idx=state.custom.findIndex(c=>c.id===state.editingCustomId);
+    if(idx!==-1) state.custom[idx]={...state.custom[idx],name,url,logo:finalLogo};
+  } else {
+    state.custom.push({id:'custom_'+Date.now(),name,url,logo:finalLogo});
+  }
+  clearEditingState(); closeModal();
+  renderSectionInner('custom');
+  if(state.sections.favorites) renderSectionInner('favorites');
+  restoreScroll(scroll);
+}
+function confirmDelete(id){
+  const item=state.custom.find(c=>c.id===id); if(!item) return;
+  document.getElementById('modal-root').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="width:400px">
+        <div style="background:linear-gradient(135deg,#c73552,#8b1a30);padding:26px 28px 22px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+          <div style="width:42px;height:42px;background:rgba(255,255,255,.18);border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </div>
+          <div style="font-size:18px;font-weight:700;font-family:'DM Serif Display',serif;color:white">Delete Shortcut</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">This cannot be undone</div>
+        </div>
+        <div style="padding:22px 28px"><p style="font-size:14px;color:#4b5563;line-height:1.7">You're about to delete <strong style="color:#111827">"${escHtml(item.name)}"</strong> from your shortcuts. It will be gone for good.</p></div>
+        <div style="padding:0 28px 26px;display:flex;gap:10px">
+          <button onclick="closeModal()" class="modal-btn-cancel">Keep it</button>
+          <button onclick="deleteCustom('${id}')" class="modal-btn-danger">Yes, delete</button>
+        </div>
+      </div>
+    </div>`;
+}
+function deleteCustom(id){
+  const scroll=saveScroll();
+  state.custom=state.custom.filter(c=>c.id!==id);
+  state.favorites=state.favorites.filter(f=>f!==id);
+  if(state.popularOrder) state.popularOrder=state.popularOrder.filter(i=>i!==id);
+  clearEditingState(); closeModal();
+  renderSectionInner('custom');
+  if(state.sections.favorites) renderSectionInner('favorites');
+  restoreScroll(scroll);
+}
+function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
+
+function switchTab(t){
+  state.tab=t;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  if(t==='Shortcuts') renderShortcuts(false);
+  else getMain().innerHTML=`<div class="coming-soon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e5e7eb" stroke-width="1.5">${TAB_ICONS[t]}</svg><div style="font-weight:600;font-size:15px;color:#9ca3af">${t}</div><div style="font-size:13px;color:#d1d5db">Coming soon</div></div>`;
+}
+
+renderShortcuts(false);
+</script>
+</body>
+</html>
