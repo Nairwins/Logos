@@ -215,7 +215,75 @@ const TAB_ICONS = {
   Billing:`<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>`
 };
 
+
+
+
 const POPULAR_BASE = [
+  {id:'spacex',     name:'SpaceX',      domain:'spacex',        url:'https://www.spacex.com/careers/jobs'},
+  {id:'wipro',      name:'Wipro',       domain:'wipro',         url:'https://careers.wipro.com/search'},
+  {id:'ferrari',    name:'Ferrari',     domain:'ferrari',       url:'https://jobs.ferrari.com'},
+  {id:'ford',       name:'Ford',        domain:'ford',          url:'https://efds.fa.em5.oraclecloud.com/hcmUI/CandidateExperience'},
+  {id:'infosys',    name:'Infosys',     domain:'infosys',       url:'https://digitalcareers.infosys.com/infosys/global-careers'},
+  {id:'pepsico',    name:'PepsiCo',     domain:'pepsico',       url:'https://www.pepsicojobs.com/main/jobs'},
+  {id:'hcltech',    name:'HCLTech',     domain:'hcltech',       url:'https://careers.hcltech.com/go/NonTPDemand/9558355/'},
+  {id:'shell',      name:'Shell',       domain:'shell',         url:'https://shell.wd3.myworkdayjobs.com/en-CA/ShellCareers'},
+  {id:'nike',       name:'Nike',        domain:'nike',          url:'https://careers.nike.com/jobs'},
+  {id:'adidas',     name:'Adidas',      domain:'adidas',        url:'https://jobs.adidas-group.com/search/'},
+  {id:'walmart',    name:'Walmart',     domain:'walmart',       url:'https://careers.walmart.com/us/en/home'},
+  {id:'nestle',     name:'Nestlé',      domain:'nestle',        url:'https://app.mokahr.com/social-recruitment/nestlezgc/91898#/'},
+  {id:'sephora',    name:'Sephora',     domain:'sephora',       url:'https://join.sephora.com/careers'},
+  {id:'lvmh',       name:'LVMH',        domain:'lvmh',          url:'https://www.lvmh.com/join-us/our-job-offers'},
+  {id:'unilever',   name:'Unilever',    domain:'unilever',      url:'https://careers.unilever.com/en/search-jobs'},
+  {id:'accenture',  name:'Accenture',   domain:'accenture',     url:'https://www.accenture.com/ca-en/careers/jobsearch'},
+  {id:'ey',         name:'EY',          domain:'ey',            url:'https://careers.ey.com/ey/search'},
+  {id:'pwc',        name:'PwC',         domain:'pwc',           url:'https://pwc.wd3.myworkdayjobs.com/Global_Experienced_Careers'},
+  {id:'loreal',     name:"L'Oréal",     domain:'loreal',        url:'https://careers.loreal.com/en_US/jobs'},
+  {id:'salesforce', name:'Salesforce',  domain:'salesforce',    url:'https://salesforce.wd12.myworkdayjobs.com/External_Career_Site'},
+    
+    
+   
+  {id:'abb',        name:'ABB',         domain:'abb',           url:'https://abb.wd3.myworkdayjobs.com/External_Career_Page'},
+  {id:'bethesda',   name:'Bethesda',    domain:'bethesda',      url:'https://jobs.zenimax.com/jobs'},
+  {id:'blizzard',   name:'Blizzard',    domain:'blizzard',      url:'https://careers.blizzard.com/global/en'},
+  {id:'bmw',        name:'BMW',         domain:'bmw',           url:'https://www.bmwgroup.jobs/ca/en/jobs.html'},
+  {id:'broadcom',   name:'Broadcom',    domain:'broadcom',      url:'https://broadcom.wd1.myworkdayjobs.com/External_Career'},
+  {id:'canonical',  name:'Canonical',   domain:'canonical',     url:'https://job-boards.greenhouse.io/canonical'},
+  {id:'cgi',        name:'CGI',         domain:'cgi',           url:'https://cgi.njoyn.com/'},
+  {id:'cloudflare', name:'Cloudflare',  domain:'cloudflare',    url:'https://www.cloudflare.com/en-ca/careers/jobs'},
+  {id:'cnexia',     name:'CNexia',      domain:'cnexia',        url:'https://www.cnexia.com/job-openings'},
+  {id:'epicgames',  name:'Epic Games',  domain:'epicgames',     url:'https://www.epicgames.com/site/careers/jobs'},
+  {id:'etsy',       name:'Etsy',        domain:'etsy',          url:'https://etsy.wd5.myworkdayjobs.com/Etsy_Careers'},
+  {id:'mercedes',   name:'Mercedes',    domain:'mercedes',      url:'https://jobs.mercedes-benz.com/enUS'},
+  {id:'hoyoverse',  name:'HoYoverse',   domain:'hoyoverse',     url:'https://www.hoyoverse.com/en-us/careers'},
+  {id:'nintendo',   name:'Nintendo',    domain:'nintendo',      url:'https://careers.nintendo.com/jobs'},
+  {id:'sega',       name:'SEGA',        domain:'sega',          url:'https://sega.wd3.myworkdayjobs.com/en-US/SEGA_Careers'},
+  {id:'qualcomm',   name:'Qualcomm',    domain:'qualcomm',      url:'https://careers.qualcomm.com/careers'},
+  {id:'riotgames',  name:'Riot Games',  domain:'riotgames',     url:'https://www.riotgames.com/en/work-with-us#job-list'},
+  {id:'toyota',     name:'Toyota',      domain:'toyota',        url:'https://directsource.magnitglobal.com/us/toyota/jobs'},
+  {id:'sony',       name:'Sony',        domain:'sony',          url:'https://www.sonyjobs.com/jobs.html'},
+    
+    
+    
+  {id:'siemens',    name:'Siemens',     domain:'siemens',       url:'https://jobs.siemens.com/en_US/externaljobs/SearchJobs'},
+  {id:'alten',      name:'Alten',       domain:'alten',         url:'https://www.alten.com/careers/job-offers'},
+  {id:'safran',     name:'Safran',      domain:'safran',        url:'https://www.safran-group.com/jobs'},
+  {id:'stellantis', name:'Stellantis',  domain:'stellantis',    url:'https://careers.stellantis.com/job-search-results/'},
+  {id:'asus',       name:'Asus',        domain:'asus',          url:'https://jobs.jobvite.com/asus'},
+  {id:'msi',        name:'MSI',         domain:'msi',           url:'hhttps://us.msi.com/about/career'},
+  {id:'hp',         name:'HP',          domain:'hp',            url:'https://hp.wd5.myworkdayjobs.com/en-US/ExternalCareerSite'},
+  {id:'lear',       name:'Lear',        domain:'lear',          url:'https://jobs.lear.com/search'},
+  {id:'lg',         name:'LG',          domain:'lg',            url:'https://globalcareers.lge.com/jobs'},
+  {id:'axa',        name:'AXA',         domain:'axa',           url:'https://careers.axa.com/careers-home/jobs'},
+  {id:'renault',    name:'Renault',     domain:'renault',       url:'https://alliancewd.wd3.myworkdayjobs.com/en-EN/renault-group-careers'},
+  {id:'audi',       name:'Audi',        domain:'audi',          url:'https://careers.audi.com/desktop.html'},
+  {id:'cisco',      name:'Cisco',       domain:'cisco',         url:'https://careers.cisco.com/global/en/search-results'},
+  {id:'danone',     name:'Danone',      domain:'danone',        url:'https://careers.danone.com/en-global/jobs.html?'},
+  {id:'deloitte',   name:'Deloitte',    domain:'deloitte',      url:'apply.deloitte.com/en_US/careers/SearchJobs'},
+  {id:'ea',         name:'EA',          domain:'ea',            url:'https://jobs.ea.com/en_US/careers'},
+  {id:'xiaomi',     name:'Xiaomi',      domain:'xiaomi',        url:'https://xiaomi.jobs.f.mioffice.cn/global'},
+
+
+
   {id:'linkedin',   name:'LinkedIn',    domain:'linkedin',      url:'https://www.linkedin.com/jobs'},
   {id:'google',     name:'Google',      domain:'google',        url:'https://www.google.com/about/careers/applications/jobs/results'},
   {id:'apple',      name:'Apple',       domain:'apple',         url:'https://jobs.apple.com/en-us/search'},
@@ -223,7 +291,7 @@ const POPULAR_BASE = [
   {id:'microsoft',  name:'Microsoft',   domain:'microsoft',     url:'https://apply.careers.microsoft.com/careers'},
   {id:'nvidia',     name:'Nvidia',      domain:'nvidia',        url:'https://jobs.nvidia.com/careers'},
   {id:'amd',        name:'AMD',         domain:'amd',           url:'hhttps://careers.amd.com/careers-home/jobs'},
-  {id:'arm',        name:'ARM',         domain:'arm',           url:'https://careers.arm.com/search-jobs'},
+  {id:'arm',        name:'Arm',         domain:'arm',           url:'https://careers.arm.com/search-jobs'},
   {id:'tesla',      name:'Tesla',       domain:'tesla',         url:'https://www.tesla.com/careers/search'},
   {id:'netflix',    name:'Netflix',     domain:'netflix',       url:'https://explore.jobs.netflix.net/careers'},
   {id:'ibm',        name:'IBM',         domain:'ibm',           url:'https://www.ibm.com/careers/search'},
