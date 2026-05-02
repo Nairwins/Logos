@@ -36,4 +36,4 @@ def fix_logo(input_path, output_path, scale=0.9):
 
 
 # run it
-fix_logo("meta.png", "output.png", scale=0.92)
+fix_logo("bmw.png", "output.png", scale=0.92)
