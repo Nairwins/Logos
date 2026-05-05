@@ -50,7 +50,7 @@
     .sc-search:hover { border-color:#c2c8cf; }
     .sc-search:focus { border-color:#c73552; }
 
-    .logo-grid { display:flex; flex-wrap:wrap; gap:50px; padding-left:10px; position:relative; }
+    .logo-grid { display:flex; flex-wrap:wrap; gap:50px; padding-left:10px; position:relative; min-height:490px; align-content:flex-start; }
 
     .pagination { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:28px; }
     .page-arrow { width:32px; height:32px; border-radius:50%; border:none; background:transparent; color:#c8d0dc; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: color .15s; flex-shrink:0; }
@@ -219,6 +219,28 @@ const TAB_ICONS = {
 
 
 const POPULAR_BASE = [
+    
+  {id:'roblox',     name:'Roblox',      domain:'roblox',        url:'https://careers.roblox.com/jobs'},
+  {id:'micron',     name:'Micron',      domain:'micron',        url:'https://careers.micron.com/careers'},
+  {id:'asml',       name:'ASML',        domain:'asml',          url:'https://www.asml.com/en/careers/find-your-job'},
+  {id:'roche',      name:'Roche',       domain:'roche',         url:'https://careers.roche.com/global/en/search-results'},
+  {id:'panasonic',  name:'Panasonic',   domain:'panasonic',     url:'https://careers.na.panasonic.com/canada/jobs'},
+  {id:'3m',         name:'3M',          domain:'3m',            url:'https://3m.wd1.myworkdayjobs.com/en-US/Search'},
+  {id:'figma',      name:'Figma',       domain:'figma',         url:'https://www.figma.com/careers/#job-openings'},
+  {id:'canva',      name:'Canva',       domain:'canva',         url:'https://www.lifeatcanva.com/en/jobs'},
+  {id:'jetbrains',  name:'JetBrains',   domain:'jetbrains',     url:'https://job-boards.eu.greenhouse.io/jetbrains'},
+  {id:'chanel',     name:'Chanel',      domain:'chanel',        url:'https://cc.wd3.myworkdayjobs.com/en-US/ChanelCareers'},
+  {id:'marriott',   name:'Marriott',    domain:'marriott',      url:'https://careers.marriott.com/jobs'},
+  {id:'enel',       name:'Enel',        domain:'enel',          url:'https://jobs.enel.com/en_US/careers/JobOpenings'},
+  {id:'leonardo',   name:'Leonardo',    domain:'leonardo',      url:'https://careers.leonardodrs.com/search'},
+  {id:'mediatek',   name:'MediaTek',    domain:'mediatek',      url:'https://careers.mediatek.com/en/jobs'},
+  {id:'heineken',   name:'Heineken',    domain:'heineken',      url:'https://careers.theheinekencompany.com/search'},
+  {id:'lenovo',     name:'Lenovo',      domain:'lenovo',        url:'https://jobs.lenovo.com/en_US/careers/SearchJobs'},
+  {id:'novonordisk',name:'Novo',        domain:'novo',          url:'https://www.novonordisk.ca/careers/find-a-job/career-search-results.html'},
+  {id:'medtronic',  name:'Medtronic',   domain:'medtronic',     url:'https://medtronic.wd1.myworkdayjobs.com/MedtronicCareers'},
+  {id:'redbull',    name:'Red Bull',    domain:'redbull',       url:'https://jobs.redbull.com'},
+    
+    
     
   {id:'workday',    name:'Workday',     domain:'workday',       url:'https://workday.wd5.myworkdayjobs.com/Workday'},
   {id:'logitech',   name:'Logitech',    domain:'logitech',      url:'https://logitech.wd5.myworkdayjobs.com/Logitech'},
@@ -453,9 +475,23 @@ function setPage(key,p){ const s=saveScroll(); state.pages[key]=p; renderSection
 function renderPagination(key,total,pageSize){
   const tp=Math.ceil(total/pageSize); if(tp<=1) return '';
   const cur=state.pages[key]||1;
+  const MAX=7, HALF=Math.floor(MAX/2);
+
+  let start=Math.max(1,cur-HALF), end=Math.min(tp,cur+HALF);
+  if(cur-HALF<1) end=Math.min(tp,MAX);
+  if(cur+HALF>tp) start=Math.max(1,tp-MAX+1);
+
+  let dots='';
+  for(let i=start;i<=end;i++){
+    const isEdge=(i===start&&start>1)||(i===end&&end<tp);
+    const size=isEdge?6:8;
+    const w=i===cur?22:size;
+    const opacity=isEdge?'opacity:.8;':'';
+    dots+=`<button class="page-dot${i===cur?' active':''}" style="width:${w}px;height:${size}px;${opacity}" onclick="setPage('${key}',${i})"></button>`;
+  }
+
   const prev=`<button class="page-arrow" ${cur===1?'disabled':''} onclick="setPage('${key}',${cur-1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>`;
   const next=`<button class="page-arrow" ${cur===tp?'disabled':''} onclick="setPage('${key}',${cur+1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>`;
-  let dots=''; for(let i=1;i<=tp;i++) dots+=`<button class="page-dot ${i===cur?'active':''}" onclick="setPage('${key}',${i})"></button>`;
   return `<div class="pagination">${prev}<div class="page-dots-wrap">${dots}</div>${next}</div>`;
 }
 
@@ -470,7 +506,7 @@ const dnd = {
   overIndex:-1, holdTimer:null, ghost:null,
   mouseX:0, mouseY:0, originalOrder:null,
 };
-const HOLD_MS = 480;
+const HOLD_MS = 300;
 
 function onCardMouseDown(e,id,sectionKey){
   if(e.button!==0) return;
